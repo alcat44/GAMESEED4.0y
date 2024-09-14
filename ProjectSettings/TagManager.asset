@@ -8,6 +8,8 @@ TagManager:
   - Kunci2
   - DropTrigger
   - Pickupable
+  - Pickupable2
+  - Enemy
   layers:
   - Default
   - TransparentFX

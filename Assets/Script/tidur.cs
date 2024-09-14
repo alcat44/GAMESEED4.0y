@@ -7,7 +7,7 @@ public class tidur : MonoBehaviour
     public Dialogpintu dialogPintu;
     public GameObject intText;
     public bool interactable;
-    public Collider laci, laci2, meja, key, lemari1, lemari2, laci4;
+    public Collider laci, laci2, meja, lemari1, lemari2, laci4;
 
     void OnTriggerStay(Collider other)
     {
@@ -38,7 +38,6 @@ public class tidur : MonoBehaviour
                 laci.enabled = true;
                 laci2.enabled = true;
                 meja.enabled = true;
-                key.enabled = true;
                 lemari1.enabled = true;
                 lemari2.enabled = true;
                 laci4.enabled = true;

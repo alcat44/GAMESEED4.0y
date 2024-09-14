@@ -6,7 +6,7 @@ public class hidingPlace : MonoBehaviour
 {
     public GameObject hideText, stopHideText;
     public GameObject normalPlayer, hidingPlayer;
-    public AINavigationall monsterScript;
+    public enemyAI1 monsterScript;
     public Transform monsterTransform;
     bool interactable, hiding;
     public float loseDistance;

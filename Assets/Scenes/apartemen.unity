@@ -1124,6 +1124,8 @@ PrefabInstance:
     - {fileID: 4960312911833677331, guid: d8688261bb848594aa1cf5e98e6aeda7, type: 3}
     - {fileID: 2297112506869539599, guid: d8688261bb848594aa1cf5e98e6aeda7, type: 3}
     - {fileID: 6760556058527444430, guid: d8688261bb848594aa1cf5e98e6aeda7, type: 3}
+    - {fileID: 5160698852179686938, guid: d8688261bb848594aa1cf5e98e6aeda7, type: 3}
+    - {fileID: 844389024809668956, guid: d8688261bb848594aa1cf5e98e6aeda7, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -10201,7 +10203,6 @@ MonoBehaviour:
   laci: {fileID: 5124477419903978829}
   laci2: {fileID: 8535976209164475144}
   meja: {fileID: 7451503385332037443}
-  key: {fileID: 8894766616450618674}
   lemari1: {fileID: 7337715913700553457}
   lemari2: {fileID: 4416674143245672447}
   laci4: {fileID: 7096078065721763575}

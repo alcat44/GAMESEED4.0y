@@ -8,13 +8,12 @@ public class Timline2 : MonoBehaviour
     public PlayableDirector timeline;
     public GameObject Camera1;
     public GameObject Camera2;
-    public GameObject Objective1;
-    public GameObject Objective2;
     public GameObject colliderObject; // Menambahkan referensi ke objek collider
     public SC_FPSController playerScript;
-    public AudioSource audioscource, audioscource2;
-    public SoundEffectsPlayer1 Audio;
-    public UnityEngine.AI.NavMeshAgent navmeshserem;
+    public AudioSource audioscource;
+    public enemyAI1 enemyScript;
+    public Collider Door1;
+    public Collider Door2;
 
     private bool canSkip = false; // Menyimpan status apakah bisa skip atau tidak
 
@@ -26,9 +25,6 @@ public class Timline2 : MonoBehaviour
             timeline = GetComponent<PlayableDirector>();
         }
 
-        // Pastikan Objective1 dan Objective2 tidak terlihat pada awal
-        Objective1.SetActive(true);
-        Objective2.SetActive(true);
         
         // Menghubungkan event untuk menangani akhir timeline
         timeline.stopped += OnTimelineStopped;
@@ -41,9 +37,9 @@ public class Timline2 : MonoBehaviour
             // Mengatur kamera dan objek
             Camera2.SetActive(true);
             Camera1.SetActive(false);
-            Objective1.SetActive(false);
-            Objective2.SetActive(false);
             DisablePlayerMovement();
+            Door1.enabled = false;
+            Door2.enabled = false;
             
             // Memulai timeline dan menjalankan coroutine untuk kontrol
             timeline.Play();
@@ -79,13 +75,9 @@ public class Timline2 : MonoBehaviour
     {
         if (playerScript != null)
         {
-            Audio.Chasemusicbg.enabled = true;
-            Audio.SFXSource.enabled = true;
-            Audio.SFXLaugh.enabled = true;
             playerScript.enabled = true; // Aktifkan kembali script movement player
             audioscource.enabled = true;
-            audioscource2.enabled = true;
-            navmeshserem.enabled = true;
+            enemyScript.enabled = true;
         }
     }
 
@@ -106,19 +98,26 @@ public class Timline2 : MonoBehaviour
         yield return null;
     }
 
-    private void EndCutscene()
+   private void EndCutscene()
     {
         // Mengembalikan kamera ke Camera1 dan menghilangkan SkipButton
         Camera1.SetActive(true);
         Camera2.SetActive(false);
-        Objective1.SetActive(true);
-        Objective2.SetActive(true);
         EnablePlayerMovement();
+        Door1.enabled = true;
+        Door2.enabled = true;
 
-        // Menghancurkan objek collider
+        // Debug untuk memastikan apakah colliderObject sudah terisi
         if (colliderObject != null)
         {
+            Debug.Log("Destroying colliderObject: " + colliderObject.name); // Log nama collider sebelum menghancurkan
             Destroy(colliderObject);
         }
+        else
+        {
+            Debug.Log("colliderObject is null!"); // Jika colliderObject ternyata null
+        }
     }
+
+
 }

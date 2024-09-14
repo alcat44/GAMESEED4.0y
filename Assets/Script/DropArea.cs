@@ -14,19 +14,20 @@ public class DropArea : MonoBehaviour
     public float textSpeed; // Kecepatan pengetikan teks
     public GameObject DialogBG; // Background dialog
     public MonoBehaviour SC_FPSController; // Kontrol player
+    public AudioSource audioSource;
 
     public PlayableDirector timeline; // Timeline yang akan dipanggil setelah 2 trigger
     public GameObject player; // Player object yang akan disembunyikan selama timeline berjalan
     public Camera playerCamera; // Kamera pemain
     public Camera cutsceneCamera; // Kamera cutscene
 
-    private int index; // Index baris dialog saat ini
+    private int index, NumberDialog; // Index baris dialog saat ini
     private bool isDialogueActive = false; // Apakah dialog sedang aktif
     private int triggerCount = 0; // Variabel untuk menghitung jumlah trigger
     private bool hasObjectSpawned = false; // Flag untuk memastikan objek hanya muncul sekali
 
-    public GameObject intText;
-    public bool interactable;
+    public GameObject intText; // UI "Press E" untuk interaksi
+    public bool interactable; // Apakah pemain dapat berinteraksi
     public Collider Object;
 
     private void Start()
@@ -51,20 +52,26 @@ public class DropArea : MonoBehaviour
 
         textComponent.text = string.Empty;
         DialogBG.SetActive(false); // Nonaktifkan background dialog di awal
+        intText.SetActive(false); // Nonaktifkan teks "Press E" di awal
     }
 
     void OnTriggerStay(Collider other)
     {
-        if(other.CompareTag("MainCamera"))
+
+        if (other.CompareTag("MainCamera"))
         {
-            intText.SetActive(true);
-            interactable = true;
+            if (!isDialogueActive)
+            {
+                intText.SetActive(true);
+                interactable = true;
+            }
         }
     }
 
+
     void OnTriggerExit(Collider other)
     {
-        if(other.CompareTag("MainCamera"))
+        if (other.CompareTag("MainCamera"))
         {
             intText.SetActive(false);
             interactable = false;
@@ -73,10 +80,18 @@ public class DropArea : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Cek apakah objek yang memasuki trigger adalah objek yang dibuang
-        if (other.CompareTag("Pickupable"))
+        if (other.CompareTag("Pickupable") || other.CompareTag("Pickupable2"))
         {
             triggerCount++; // Tambahkan jumlah trigger setiap kali objek mengenai trigger
+
+            if (other.CompareTag("Pickupable"))
+            {
+                NumberDialog = 0; // Set NumberDialog untuk Pickupable
+            }
+            else if (other.CompareTag("Pickupable2"))
+            {
+                NumberDialog = 4; // Set NumberDialog untuk Pickupable2
+            }
 
             if (!hasObjectSpawned)
             {
@@ -86,7 +101,6 @@ public class DropArea : MonoBehaviour
 
             Destroy(other.gameObject); // Hapus objek yang dibuang
 
-            // Cek apakah objek sudah mengenai trigger 2 kali
             if (triggerCount >= 2 && timeline != null)
             {
                 // Aktifkan timeline
@@ -104,28 +118,57 @@ public class DropArea : MonoBehaviour
             }
             else if (triggerCount == 1) // Mulai dialog jika triggerCount == 1
             {
-                StartDialog();
+                StartDialog(); // Mulai dialog dari NumberDialog yang sudah ditentukan
             }
         }
     }
 
+
     private void Update()
     {
-        // Tidak ada input handling untuk dialog di sini
+        // Menangani input untuk melanjutkan dialog
+        if (isDialogueActive && Input.GetKeyDown(KeyCode.E))
+        {
+            if (textComponent.text == lines[index])
+            {
+                NextLine();
+            }
+            else
+            {
+                StopAllCoroutines();
+                textComponent.text = lines[index];
+            }
+        }
     }
 
     void StartDialog()
     {
-        index = 0; // Mulai dari dialog pertama
+        index = NumberDialog; // Mulai dialog dari nilai NumberDialog
         isDialogueActive = true; // Tandai dialog sedang aktif
         SC_FPSController.enabled = false; // Nonaktifkan movement player
+        audioSource.enabled = false;
+        intText.SetActive(false); // Sembunyikan teks "Press E"
         DialogBG.SetActive(true); // Tampilkan background dialog
 
-        // Mulai dialog langsung tanpa menunggu input pemain
-        StartCoroutine(DisplayLine());
+        StartCoroutine(TypeLine()); // Mulai dialog pertama
     }
 
-    IEnumerator DisplayLine()
+    void NextLine()
+    {
+        // Pastikan index tidak melebihi jumlah baris dalam array lines
+        if (index < lines.Length - 1 && index < NumberDialog + 3) 
+        {
+            index++; // Tambah index
+            textComponent.text = string.Empty;
+            StartCoroutine(TypeLine()); // Tampilkan dialog berikutnya
+        }
+        else
+        {
+            EndDialog(); // Akhiri dialog jika sudah tidak ada lagi line atau index melebihi batas
+        }
+    }
+    
+    IEnumerator TypeLine()
     {
         textComponent.text = string.Empty;
         foreach (char c in lines[index].ToCharArray())
@@ -133,31 +176,15 @@ public class DropArea : MonoBehaviour
             textComponent.text += c;
             yield return new WaitForSeconds(textSpeed);
         }
-
-        // Setelah menampilkan satu line, tunggu sebentar sebelum melanjutkan
-        yield return new WaitForSeconds(2f); // Delay sebelum melanjutkan ke dialog berikutnya
-
-        NextLine(); // Lanjutkan ke line berikutnya
     }
 
-    void NextLine()
-    {
-        if (index < lines.Length - 1) // Lanjutkan ke dialog berikutnya jika masih ada
-        {
-            index++;
-            StartCoroutine(DisplayLine());
-        }
-        else
-        {
-            EndDialog(); // Akhiri dialog jika sudah tidak ada lagi line
-        }
-    }
 
     void EndDialog()
     {
         isDialogueActive = false; // Tandai dialog selesai
-        textComponent.text = string.Empty; 
+        textComponent.text = string.Empty;
         SC_FPSController.enabled = true; // Aktifkan kembali kontrol pemain
+        audioSource.enabled = true;
         DialogBG.SetActive(false); // Sembunyikan background dialog
 
         // Kembalikan kamera ke player jika ada timeline
@@ -198,6 +225,7 @@ public class DropArea : MonoBehaviour
         if (player != null)
         {
             player.GetComponent<SC_FPSController>().enabled = false;
+            player.GetComponent<AudioSource>().enabled = false;
 
             // Nonaktifkan mesh renderer (atau komponen visual lainnya) untuk "menyembunyikan" player
             foreach (Renderer rend in player.GetComponentsInChildren<Renderer>())
@@ -214,6 +242,7 @@ public class DropArea : MonoBehaviour
         if (player != null)
         {
             player.GetComponent<SC_FPSController>().enabled = true;
+            player.GetComponent<AudioSource>().enabled = true;
 
             // Aktifkan kembali mesh renderer untuk "menampilkan" player
             foreach (Renderer rend in player.GetComponentsInChildren<Renderer>())
@@ -261,6 +290,5 @@ public class DropArea : MonoBehaviour
     {
         intText.SetActive(state);
         interactable = state;
-        // Jika ada interaksi lain yang perlu diaktifkan/nonaktifkan, tambahkan di sini
     }
 }

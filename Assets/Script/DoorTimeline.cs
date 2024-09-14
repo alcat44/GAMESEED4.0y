@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Door : MonoBehaviour
+public class DoorTimeline : MonoBehaviour
 {
     public GameObject intText; // Interact text for player
     public bool interactable, toggle;
@@ -10,7 +10,7 @@ public class Door : MonoBehaviour
     public AudioSource audioSource;
     public AudioClip openSound;
     public AudioClip closeSound;
-    public Collider Object;
+    public GameObject Timeline;
 
     private bool isEnemyNearby = false; // To check if the enemy is already near the door
     private bool isActionInProgress = false; // Flag to prevent spam triggering
@@ -65,6 +65,7 @@ public class Door : MonoBehaviour
                 toggle = !toggle;
                 if (toggle == true)
                 {
+                    Timeline.SetActive(true);
                     StartCoroutine(OpenDoor());
                 }
                 else
@@ -83,7 +84,6 @@ public class Door : MonoBehaviour
         doorAnim.ResetTrigger("close");
         doorAnim.SetTrigger("open");
         audioSource.PlayOneShot(openSound);
-        Object.enabled = true;
         toggle = true;
         yield return new WaitForSeconds(1f); // Delay to prevent spam (adjust the delay as needed)
         isActionInProgress = false; // Reset the flag after door fully opens
@@ -95,7 +95,6 @@ public class Door : MonoBehaviour
         doorAnim.ResetTrigger("open");
         doorAnim.SetTrigger("close");
         audioSource.PlayOneShot(closeSound);
-        Object.enabled = false;
         toggle = false;
         yield return new WaitForSeconds(1f); // Delay to prevent spam (adjust the delay as needed)
         isActionInProgress = false; // Reset the flag after door fully closes
